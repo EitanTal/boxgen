@@ -1,5 +1,7 @@
 import svgwrite
 
+version = '0.1'
+
 inch = 25.4 * 3.7795 # pixels2inch
 mat_thickness = 0.22
 side_tab = 1.0
@@ -10,9 +12,9 @@ top_tab = 0.5
 no_tab_threshold = 2.5
 extra_top_tab_threshold = 24
 
-box_height = 10
-box_width = 5
-box_depth = 8
+box_height = float(input('box height: '))
+box_width  = float(input('box width:  '))
+box_depth  = float(input('box depth:  '))
 
 # box is always landscape-orientation: The width is always equal or larger than depth
 if (box_width < box_depth):
@@ -20,7 +22,10 @@ if (box_width < box_depth):
     box_width = box_depth
     box_depth = tmp
 
-dwg = svgwrite.Drawing('test.svg', profile='tiny')
+
+filename = '_'.join(['boxgen'+version, str(box_height)+'h', str(box_width)+'w', str(box_depth)+'d']) + '.svg'
+
+dwg = svgwrite.Drawing(filename, profile='tiny')
 top = dwg.add(dwg.g(id='part1', stroke='blue', fill='red'))
 front = dwg.add(dwg.g(id='part1', stroke='blue', fill='red'))
 side = dwg.add(dwg.g(id='part1', stroke='blue', fill='red'))
@@ -90,3 +95,4 @@ tmp.scale(inch,-inch)
 top.add(tmp)
 
 dwg.save()
+print ('saved: ', filename)
