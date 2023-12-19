@@ -37,6 +37,7 @@ front = dwg.add(dwg.g(id='part1', stroke='blue', fill='red'))
 side = dwg.add(dwg.g(id='part1', stroke='blue', fill='red'))
 sidecomplex = dwg.add(dwg.g(id='part1', stroke='blue', fill='red'))
 topcomplex = dwg.add(dwg.g(id='part1', stroke='blue', fill='red'))
+topcomplex2 = dwg.add(dwg.g(id='part1', stroke='blue', fill='red'))
 
 # Commonly used metric:
 height_half_minus_tab       = (box_height - side_tab) / 2
@@ -212,6 +213,64 @@ for yoffset in (0, box_depth):
             tmp.translate(position_top_complex_x, position_top_complex_y)
             tmp.scale(inch,inch)
             topcomplex.add(tmp)
+
+
+#top-complex-2:
+position_top_complex_x = (max(box_width,box_depth)+1)*inch
+position_top_complex_y = (box_height+1)*2*inch
+points = [(0,0),(box_width*2,0),(box_width*2,box_depth),(0,box_depth)]
+tmp = dwg.polygon(points, stroke_width=0.1)
+tmp.translate(position_top_complex_x, position_top_complex_y)
+tmp.scale(inch,inch)
+topcomplex2.add(tmp)
+points = [(box_width,0),(box_width,box_depth)]
+tmp = dwg.polygon(points, stroke_width=0.1)
+tmp.translate(position_top_complex_x, position_top_complex_y)
+tmp.scale(inch,inch)
+topcomplex2.add(tmp)
+
+
+for xoffset in (0, box_width):
+    # top panel - L's:
+    points = [(0,0),(mat_thickness+top_tab,0),(mat_thickness+top_tab,mat_thickness),(mat_thickness,mat_thickness),(mat_thickness,top_tab),(0,top_tab)]
+    tmp = dwg.polygon(points, stroke_width=0.1)
+    tmp.translate((xoffset+overhang)*inch,(overhang)*inch)
+    tmp.translate(position_top_complex_x, position_top_complex_y)
+    tmp.scale(inch,inch)
+    topcomplex2.add(tmp)
+    tmp = dwg.polygon(points, stroke_width=0.1)
+    tmp.translate((box_width-overhang+xoffset)*inch,(overhang)*inch)
+    tmp.translate(position_top_complex_x, position_top_complex_y)
+    tmp.scale(-inch,inch)
+    topcomplex2.add(tmp)
+    tmp = dwg.polygon(points, stroke_width=0.1)
+    tmp.translate((box_width-overhang+xoffset)*inch,(box_depth-overhang)*inch)
+    tmp.translate(position_top_complex_x, position_top_complex_y)
+    tmp.scale(-inch,-inch)
+    topcomplex2.add(tmp)
+    tmp = dwg.polygon(points, stroke_width=0.1)
+    tmp.translate((overhang+xoffset)*inch,(box_depth-overhang)*inch)
+    tmp.translate(position_top_complex_x, position_top_complex_y)
+    tmp.scale(inch,-inch)
+    topcomplex2.add(tmp)
+    # top panel - I's: (If present)
+    if (box_width >= extra_top_tab_threshold):
+        for yy in (overhang, box_depth-overhang-overhang):
+            points = [(0,0),(centertop_tab,0),(centertop_tab,mat_thickness),(0,mat_thickness)]
+            tmp = dwg.polygon(points, stroke_width=0.1)
+            tmp.translate((xoffset+((box_width-centertop_tab)/2))*inch,(yy)*inch)
+            tmp.translate(position_top_complex_x, position_top_complex_y)
+            tmp.scale(inch,inch)
+            topcomplex2.add(tmp)
+    if (box_depth >= extra_top_tab_threshold):
+        for xx in (overhang, box_width-overhang-overhang):
+            points = [(0,0),(mat_thickness,0),(mat_thickness,centertop_tab),(0,centertop_tab)]
+            tmp = dwg.polygon(points, stroke_width=0.1)
+            tmp.translate((xx+xoffset)*inch,(((box_depth-centertop_tab)/2))*inch)
+            tmp.translate(position_top_complex_x, position_top_complex_y)
+            tmp.scale(inch,inch)
+            topcomplex2.add(tmp)
+
 
 
 dwg.save()
