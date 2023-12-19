@@ -7,9 +7,10 @@ mat_thickness = 0.22
 side_tab = 1.0
 overhang = 0.25
 top_tab = 0.5
+centertop_tab = 1.0
 
 # Placeholders. Implementatino needed
-no_tab_threshold = 2.5
+no_sidetab_threshold = 2.5
 extra_top_tab_threshold = 24
 
 box_height = float(input('box height: '))
@@ -17,8 +18,8 @@ box_width  = float(input('box width:  '))
 box_depth  = float(input('box depth:  '))
 
 #box_height = 10
-#box_width  = 7
-#box_depth  = 8
+#box_width  = 25
+#box_depth  = 28
 
 
 # box is always landscape-orientation: The width is always equal or larger than depth
@@ -37,89 +38,94 @@ side = dwg.add(dwg.g(id='part1', stroke='blue', fill='red'))
 sidecomplex = dwg.add(dwg.g(id='part1', stroke='blue', fill='red'))
 topcomplex = dwg.add(dwg.g(id='part1', stroke='blue', fill='red'))
 
-# Front panel:
-size_minus_overhang         = box_width - overhang - overhang - mat_thickness - mat_thickness
-size_minus_overhang_andtab = size_minus_overhang - top_tab
+# Commonly used metric:
 height_half_minus_tab       = (box_height - side_tab) / 2
-points = [(0,0),(top_tab,0),(top_tab,mat_thickness),
-          (size_minus_overhang_andtab, mat_thickness),(size_minus_overhang_andtab, 0),(size_minus_overhang,0),
-          (size_minus_overhang,height_half_minus_tab),(size_minus_overhang+mat_thickness,height_half_minus_tab),
-          (size_minus_overhang+mat_thickness,height_half_minus_tab+side_tab),(size_minus_overhang,height_half_minus_tab+side_tab),
-          (size_minus_overhang,box_height),(size_minus_overhang-top_tab,box_height),
-          (size_minus_overhang-top_tab,box_height-mat_thickness),
-          (top_tab,box_height-mat_thickness),(top_tab,box_height),(0,box_height),(0,height_half_minus_tab+side_tab),(-mat_thickness,height_half_minus_tab+side_tab),
-          (-mat_thickness,height_half_minus_tab),(0,height_half_minus_tab)]
-
-tmp = dwg.polygon(points, stroke_width=0.1)
-tmp.scale(inch,inch)
-front.add(tmp)
-
-# Side panel:
-size_minus_overhang         = box_depth - overhang - overhang
-size_minus_overhang_andtab = size_minus_overhang - top_tab
-height_half_minus_tab       = (box_height - side_tab) / 2
-points = [(0,0),(top_tab,0),(top_tab,mat_thickness),
-          (size_minus_overhang_andtab, mat_thickness),(size_minus_overhang_andtab, 0),(size_minus_overhang,0),
-          (size_minus_overhang,height_half_minus_tab),(size_minus_overhang-mat_thickness,height_half_minus_tab),
-          (size_minus_overhang-mat_thickness,height_half_minus_tab+side_tab),(size_minus_overhang,height_half_minus_tab+side_tab),
-          (size_minus_overhang,box_height),(size_minus_overhang-top_tab,box_height),
-          (size_minus_overhang-top_tab,box_height-mat_thickness),
-          (top_tab,box_height-mat_thickness),(top_tab,box_height),(0,box_height),(0,height_half_minus_tab+side_tab),(mat_thickness,height_half_minus_tab+side_tab),
-          (mat_thickness,height_half_minus_tab),(0,height_half_minus_tab)]
-
-tmp = dwg.polygon(points, stroke_width=0.1)
-tmp.translate((box_width+1)*inch,0*inch)
-tmp.scale(inch,inch)
-side.add(tmp)
 
 # Top panel:
+top_panel_posx = -(max(box_width,box_depth)+1)*inch
+top_panel_posy = 0*inch
 points = [(0,0),(box_width,0),(box_width,box_depth),(0,box_depth)]
 tmp = dwg.polygon(points, stroke_width=0.1)
-tmp.translate((box_width+box_depth+2)*inch,0*inch)
+tmp.translate(top_panel_posx,top_panel_posy)
 tmp.scale(inch,inch)
 top.add(tmp)
 # top panel - L's:
 points = [(0,0),(mat_thickness+top_tab,0),(mat_thickness+top_tab,mat_thickness),(mat_thickness,mat_thickness),(mat_thickness,top_tab),(0,top_tab)]
 tmp = dwg.polygon(points, stroke_width=0.1)
 tmp.translate(overhang*inch,overhang*inch)
-tmp.translate((box_width+box_depth+2)*inch,0*inch)
+tmp.translate(top_panel_posx,top_panel_posy)
 tmp.scale(inch,inch)
 top.add(tmp)
 tmp = dwg.polygon(points, stroke_width=0.1)
 tmp.translate((box_width-overhang)*inch,overhang*inch)
-tmp.translate((box_width+box_depth+2)*inch,0*inch)
+tmp.translate(top_panel_posx,top_panel_posy)
 tmp.scale(-inch,inch)
 top.add(tmp)
 tmp = dwg.polygon(points, stroke_width=0.1)
 tmp.translate((box_width-overhang)*inch,(box_depth-overhang)*inch)
-tmp.translate((box_width+box_depth+2)*inch,0*inch)
+tmp.translate(top_panel_posx,top_panel_posy)
 tmp.scale(-inch,-inch)
 top.add(tmp)
 tmp = dwg.polygon(points, stroke_width=0.1)
 tmp.translate(overhang*inch,(box_depth-overhang)*inch)
-tmp.translate((box_width+box_depth+2)*inch,0*inch)
+tmp.translate(top_panel_posx,top_panel_posy)
 tmp.scale(inch,-inch)
 top.add(tmp)
+# I's if present:
+if (box_width >= extra_top_tab_threshold):
+    for yy in (overhang, box_depth-overhang-overhang):
+        points = [(0,0),(centertop_tab,0),(centertop_tab,mat_thickness),(0,mat_thickness)]
+        tmp = dwg.polygon(points, stroke_width=0.1)
+        tmp.translate((box_width-centertop_tab)/2*inch,(yy)*inch)
+        tmp.translate(top_panel_posx,top_panel_posy)
+        tmp.scale(inch,inch)
+        top.add(tmp)
+if (box_depth >= extra_top_tab_threshold):
+    for xx in (overhang, box_width-overhang-overhang):
+        points = [(0,0),(mat_thickness,0),(mat_thickness,centertop_tab),(0,centertop_tab)]
+        tmp = dwg.polygon(points, stroke_width=0.1)
+        tmp.translate(xx*inch,(((box_depth-centertop_tab)/2))*inch)
+        tmp.translate(top_panel_posx,top_panel_posy)
+        tmp.scale(inch,inch)
+        top.add(tmp)
+
 
 # 4-sides complex:
 part1size1 = box_width - overhang - overhang - mat_thickness - mat_thickness
 part1size2 = part1size1 - top_tab
-part1top = [(0,0),(top_tab,0),(top_tab,mat_thickness),
-          (part1size2, mat_thickness),(part1size2, 0),(part1size1,0)]
+part1size3 = (part1size1 - centertop_tab) / 2
+
+if (box_width < extra_top_tab_threshold):
+    part1top = [(0,0),(top_tab,0),(top_tab,mat_thickness),
+            (part1size2, mat_thickness),(part1size2, 0),(part1size1,0)]
+else:
+    part1top = [(0,0),(top_tab,0),(top_tab,mat_thickness),
+                (part1size3, mat_thickness),(part1size3, 0),(part1size3 + centertop_tab, 0), (part1size3 + centertop_tab, mat_thickness),
+                (part1size2, mat_thickness),(part1size2, 0),(part1size1,0)]
+
 
 part2size1 = box_depth - overhang - overhang
 part2size2 = part2size1 - top_tab
-part2top = [(0,0),(top_tab,0),(top_tab,mat_thickness),
-          (part2size2, mat_thickness),(part2size2, 0),(part2size1,0)]
-
+part2size3 = (part2size1 - centertop_tab) / 2
+if (box_depth < extra_top_tab_threshold):
+    part2top = [(0,0),(top_tab,0),(top_tab,mat_thickness),
+            (part2size2, mat_thickness),(part2size2, 0),(part2size1,0)]
+else:
+    part2top = [(0,0),(top_tab,0),(top_tab,mat_thickness),
+                    (part2size3, mat_thickness),(part2size3, 0),(part2size3 + centertop_tab, 0), (part2size3 + centertop_tab, mat_thickness),
+                    (part2size2, mat_thickness),(part2size2, 0),(part2size1,0)]
 
 part2_translated = [(x[0]+part1size1, x[1]) for x in part2top]
 part12 = part1top + part2_translated
 part12_doubled = part12 + [(x[0]+part1size1+part2size1, x[1]) for x in part12]
 part12_doubled_updown = [(x[0], box_height-x[1]) for x in part12_doubled]
 
-part3 = [ (0,0), (0,height_half_minus_tab), (-mat_thickness,height_half_minus_tab),
-          (-mat_thickness,height_half_minus_tab+side_tab),(0,height_half_minus_tab+side_tab),(0,box_height)]
+if (box_height > no_sidetab_threshold):
+    part3 = [ (0,0), (0,height_half_minus_tab), (-mat_thickness,height_half_minus_tab),
+            (-mat_thickness,height_half_minus_tab+side_tab),(0,height_half_minus_tab+side_tab),(0,box_height)]
+else:
+    part3 = [ (0,0), (0,box_height)]
+
 part4 = [(part1size1-x[0], x[1]) for x in part3]
 
 part3_shifted = [(part1size1+part2size1+x[0], x[1]) for x in part3]
@@ -131,6 +137,25 @@ for points in (part12_doubled_updown,part12_doubled, part3, part4, part3_shifted
     tmp.translate(0*inch,(box_height+1)*inch)
     tmp.scale(inch,inch)
     sidecomplex.add(tmp)
+
+# Front panel:
+part1bottom = [(x[0], box_height-x[1]) for x in part1top]
+points = part1top + part4 + part1bottom[::-1] + part3[::-1]
+
+tmp = dwg.polygon(points, stroke_width=0.1)
+tmp.scale(inch,inch)
+front.add(tmp)
+
+# Side panel:
+part2bottom = [(x[0], box_height-x[1]) for x in part2top]
+part3_negative = [(-x[0], x[1]) for x in part3]
+points = part2top + [(part2size1+x[0], x[1]) for x in part3] + part2bottom[::-1] + part3_negative[::-1]
+
+tmp = dwg.polygon(points, stroke_width=0.1)
+tmp.translate((box_width+1)*inch,0*inch)
+tmp.scale(inch,inch)
+side.add(tmp)
+
 
 #top-complex:
 position_top_complex_x = 0*inch
@@ -170,6 +195,24 @@ for yoffset in (0, box_depth):
     tmp.translate(position_top_complex_x, position_top_complex_y)
     tmp.scale(inch,-inch)
     topcomplex.add(tmp)
+    # top panel - I's: (If present)
+    if (box_width >= extra_top_tab_threshold):
+        for yy in (overhang, box_depth-overhang-overhang):
+            points = [(0,0),(centertop_tab,0),(centertop_tab,mat_thickness),(0,mat_thickness)]
+            tmp = dwg.polygon(points, stroke_width=0.1)
+            tmp.translate((box_width-centertop_tab)/2*inch,(yoffset+yy)*inch)
+            tmp.translate(position_top_complex_x, position_top_complex_y)
+            tmp.scale(inch,inch)
+            topcomplex.add(tmp)
+    if (box_depth >= extra_top_tab_threshold):
+        for xx in (overhang, box_width-overhang-overhang):
+            points = [(0,0),(mat_thickness,0),(mat_thickness,centertop_tab),(0,centertop_tab)]
+            tmp = dwg.polygon(points, stroke_width=0.1)
+            tmp.translate(xx*inch,(((box_depth-centertop_tab)/2)+yoffset)*inch)
+            tmp.translate(position_top_complex_x, position_top_complex_y)
+            tmp.scale(inch,inch)
+            topcomplex.add(tmp)
+
 
 dwg.save()
 print ('saved: ', filename)
