@@ -1,17 +1,18 @@
 import svgwrite
 
-version = '0.1'
-
+version = '0.2'
 inch = 25.4 * 3.7795 # pixels2inch
+
+#### PARAM BLOCK ######################
 mat_thickness = 0.22
 side_tab = 1.0
 overhang = 0.25
 top_tab = 0.5
 centertop_tab = 1.0
-
-# Placeholders. Implementatino needed
+tightness = 0.01 # Makes the holes at the top and bottom tighter
 no_sidetab_threshold = 2.5
 extra_top_tab_threshold = 24
+#### PARAM BLOCK - END  ##############
 
 box_height = float(input('box height: '))
 box_width  = float(input('box width:  '))
@@ -27,7 +28,6 @@ if (box_width < box_depth):
     box_width = box_depth
     box_depth = tmp
 
-
 filename = '_'.join(['boxgen'+version, str(box_height)+'h', str(box_width)+'w', str(box_depth)+'d']) + '.svg'
 
 dwg = svgwrite.Drawing(filename, profile='tiny')
@@ -42,7 +42,7 @@ topcomplex2 = dwg.add(dwg.g(id='part1', stroke='blue', fill='red'))
 height_half_minus_tab       = (box_height - side_tab) / 2
 
 def top_panel_add_ls(panel, posx, posy):
-    points = [(0,0),(mat_thickness+top_tab,0),(mat_thickness+top_tab,mat_thickness),(mat_thickness,mat_thickness),(mat_thickness,top_tab),(0,top_tab)]
+    points = [(0,0),(mat_thickness+top_tab-tightness,0),(mat_thickness+top_tab-tightness,mat_thickness-tightness),(mat_thickness-tightness,mat_thickness-tightness),(mat_thickness-tightness,top_tab-tightness),(0,top_tab-tightness)]
     tmp = dwg.polygon(points, stroke_width=0.1)
     tmp.translate(overhang*inch,overhang*inch)
     tmp.translate(posx,posy)
@@ -65,20 +65,20 @@ def top_panel_add_ls(panel, posx, posy):
     panel.add(tmp)
     # I's if present:
     if (box_width >= extra_top_tab_threshold):
-        for yy in (overhang, box_depth-overhang-overhang):
-            points = [(0,0),(centertop_tab,0),(centertop_tab,mat_thickness),(0,mat_thickness)]
+        for (yy,sy) in ((overhang,1), (box_depth-overhang,-1)):
+            points = [(0,0),(centertop_tab-tightness,0),(centertop_tab-tightness,mat_thickness-tightness),(0,mat_thickness-tightness)]
             tmp = dwg.polygon(points, stroke_width=0.1)
             tmp.translate((box_width-centertop_tab)/2*inch,(yy)*inch)
             tmp.translate(posx,posy)
-            tmp.scale(inch,inch)
+            tmp.scale(inch,inch*sy)
             panel.add(tmp)
     if (box_depth >= extra_top_tab_threshold):
-        for xx in (overhang, box_width-overhang-overhang):
-            points = [(0,0),(mat_thickness,0),(mat_thickness,centertop_tab),(0,centertop_tab)]
+        for (xx,sx) in ((overhang,1), (box_width-overhang,-1)):
+            points = [(0,0),(mat_thickness-tightness,0),(mat_thickness-tightness,centertop_tab-tightness),(0,centertop_tab-tightness)]
             tmp = dwg.polygon(points, stroke_width=0.1)
             tmp.translate(xx*inch,(((box_depth-centertop_tab)/2))*inch)
             tmp.translate(posx,posy)
-            tmp.scale(inch,inch)
+            tmp.scale(inch*sx,inch)
             panel.add(tmp)
 
 # Top panel:
