@@ -12,6 +12,10 @@ centertop_tab = 1.0
 tightness = 0.01 # Makes the holes at the top and bottom tighter
 no_sidetab_threshold = 2.5
 extra_top_tab_threshold = 24
+draw_individual = False
+draw_fourside = False
+draw_dualtop1 = False
+draw_dualtop2 = True
 #### PARAM BLOCK - END  ##############
 
 box_height = float(input('box height: '))
@@ -82,14 +86,15 @@ def top_panel_add_ls(panel, posx, posy):
             panel.add(tmp)
 
 # Top panel:
-top_panel_posx = -(max(box_width,box_depth)+1)*inch
-top_panel_posy = 0*inch
-points = [(0,0),(box_width,0),(box_width,box_depth),(0,box_depth)]
-tmp = dwg.polygon(points, stroke_width=0.1)
-tmp.translate(top_panel_posx,top_panel_posy)
-tmp.scale(inch,inch)
-top.add(tmp)
-top_panel_add_ls(top, top_panel_posx, top_panel_posy)
+if (draw_individual):
+    top_panel_posx = -(max(box_width,box_depth)+1)*inch
+    top_panel_posy = 0*inch
+    points = [(0,0),(box_width,0),(box_width,box_depth),(0,box_depth)]
+    tmp = dwg.polygon(points, stroke_width=0.1)
+    tmp.translate(top_panel_posx,top_panel_posy)
+    tmp.scale(inch,inch)
+    top.add(tmp)
+    top_panel_add_ls(top, top_panel_posx, top_panel_posy)
 
 # 4-sides complex:
 part1size1 = box_width - overhang - overhang - mat_thickness - mat_thickness
@@ -133,61 +138,65 @@ part3_shifted = [(part1size1+part2size1+x[0], x[1]) for x in part3]
 part4_shifted = [(part1size1+part2size1+x[0], x[1]) for x in part4]
 part3_shifted2 = [(part1size1+part2size1+x[0], x[1]) for x in part3_shifted]
 
-for points in (part12_doubled_updown,part12_doubled, part3, part4, part3_shifted,part4_shifted,part3_shifted2):
-    tmp = dwg.polyline(points, stroke_width=0.1)
-    tmp.translate(0*inch,(box_height+1)*inch)
-    tmp.scale(inch,inch)
-    sidecomplex.add(tmp)
+if (draw_fourside):
+    for points in (part12_doubled_updown,part12_doubled, part3, part4, part3_shifted,part4_shifted,part3_shifted2):
+        tmp = dwg.polyline(points, stroke_width=0.1)
+        tmp.translate(0*inch,(box_height+1)*inch)
+        tmp.scale(inch,inch)
+        sidecomplex.add(tmp)
 
 # Front panel:
-part1bottom = [(x[0], box_height-x[1]) for x in part1top]
-points = part1top + part4 + part1bottom[::-1] + part3[::-1]
+if (draw_individual):
+    part1bottom = [(x[0], box_height-x[1]) for x in part1top]
+    points = part1top + part4 + part1bottom[::-1] + part3[::-1]
 
-tmp = dwg.polygon(points, stroke_width=0.1)
-tmp.scale(inch,inch)
-front.add(tmp)
+    tmp = dwg.polygon(points, stroke_width=0.1)
+    tmp.scale(inch,inch)
+    front.add(tmp)
 
-# Side panel:
-part2bottom = [(x[0], box_height-x[1]) for x in part2top]
-part3_negative = [(-x[0], x[1]) for x in part3]
-points = part2top + [(part2size1+x[0], x[1]) for x in part3] + part2bottom[::-1] + part3_negative[::-1]
+    # Side panel:
+    part2bottom = [(x[0], box_height-x[1]) for x in part2top]
+    part3_negative = [(-x[0], x[1]) for x in part3]
+    points = part2top + [(part2size1+x[0], x[1]) for x in part3] + part2bottom[::-1] + part3_negative[::-1]
 
-tmp = dwg.polygon(points, stroke_width=0.1)
-tmp.translate((box_width+1)*inch,0*inch)
-tmp.scale(inch,inch)
-side.add(tmp)
+    tmp = dwg.polygon(points, stroke_width=0.1)
+    tmp.translate((box_width+1)*inch,0*inch)
+    tmp.scale(inch,inch)
+    side.add(tmp)
 
 #top-complex:
-position_top_complex_x = 0*inch
-position_top_complex_y = (box_height+1)*2*inch
-points = [(0,0),(box_width,0),(box_width,2*box_depth),(0,2*box_depth)]
-tmp = dwg.polygon(points, stroke_width=0.1)
-tmp.translate(position_top_complex_x, position_top_complex_y)
-tmp.scale(inch,inch)
-topcomplex.add(tmp)
-points = [(0,box_depth),(box_width,box_depth)]
-tmp = dwg.polygon(points, stroke_width=0.1)
-tmp.translate(position_top_complex_x, position_top_complex_y)
-tmp.scale(inch,inch)
-topcomplex.add(tmp)
-for yoffset in (0, box_depth*inch):
-    top_panel_add_ls(topcomplex, position_top_complex_x, position_top_complex_y+yoffset)
+if (draw_dualtop1):
+    position_top_complex_x = 0*inch
+    position_top_complex_y = (box_height+1)*2*inch
+    points = [(0,0),(box_width,0),(box_width,2*box_depth),(0,2*box_depth)]
+    tmp = dwg.polygon(points, stroke_width=0.1)
+    tmp.translate(position_top_complex_x, position_top_complex_y)
+    tmp.scale(inch,inch)
+    topcomplex.add(tmp)
+    points = [(0,box_depth),(box_width,box_depth)]
+    tmp = dwg.polygon(points, stroke_width=0.1)
+    tmp.translate(position_top_complex_x, position_top_complex_y)
+    tmp.scale(inch,inch)
+    topcomplex.add(tmp)
+    for yoffset in (0, box_depth*inch):
+        top_panel_add_ls(topcomplex, position_top_complex_x, position_top_complex_y+yoffset)
 
 #top-complex-2:
-position_top_complex_x = (max(box_width,box_depth)+1)*inch
-position_top_complex_y = (box_height+1)*2*inch
-points = [(0,0),(box_width*2,0),(box_width*2,box_depth),(0,box_depth)]
-tmp = dwg.polygon(points, stroke_width=0.1)
-tmp.translate(position_top_complex_x, position_top_complex_y)
-tmp.scale(inch,inch)
-topcomplex2.add(tmp)
-points = [(box_width,0),(box_width,box_depth)]
-tmp = dwg.polygon(points, stroke_width=0.1)
-tmp.translate(position_top_complex_x, position_top_complex_y)
-tmp.scale(inch,inch)
-topcomplex2.add(tmp)
-for xoffset in (0, box_width*inch):
-    top_panel_add_ls(topcomplex2, position_top_complex_x+xoffset, position_top_complex_y)
+if (draw_dualtop2):
+    position_top_complex_x = (max(box_width,box_depth)+1)*inch
+    position_top_complex_y = (box_height+1)*2*inch
+    points = [(0,0),(box_width*2,0),(box_width*2,box_depth),(0,box_depth)]
+    tmp = dwg.polygon(points, stroke_width=0.1)
+    tmp.translate(position_top_complex_x, position_top_complex_y)
+    tmp.scale(inch,inch)
+    topcomplex2.add(tmp)
+    points = [(box_width,0),(box_width,box_depth)]
+    tmp = dwg.polygon(points, stroke_width=0.1)
+    tmp.translate(position_top_complex_x, position_top_complex_y)
+    tmp.scale(inch,inch)
+    topcomplex2.add(tmp)
+    for xoffset in (0, box_width*inch):
+        top_panel_add_ls(topcomplex2, position_top_complex_x+xoffset, position_top_complex_y)
 
 dwg.save()
 print ('saved: ', filename)
