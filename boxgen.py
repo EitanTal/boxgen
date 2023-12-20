@@ -12,9 +12,9 @@ centertop_tab = 1.0
 tightness = 0.01 # Makes the holes at the top and bottom tighter
 no_sidetab_threshold = 2.5
 extra_top_tab_threshold = 24
-draw_individual = False
-draw_fourside = False
-draw_dualtop1 = False
+draw_individual = True
+draw_fourside = True
+draw_dualtop1 = True
 draw_dualtop2 = True
 #### PARAM BLOCK - END  ##############
 
