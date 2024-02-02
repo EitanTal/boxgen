@@ -10,7 +10,8 @@ overhang = 0.25
 top_tab = 0.5
 centertop_tab = 1.0
 tightness = 0.01 # Makes the holes at the top and bottom tighter
-no_sidetab_threshold = 2.5
+short_sidetab_threshold = 3.0
+no_sidetab_threshold = 0.0
 extra_top_tab_threshold = 24
 draw_individual = True
 draw_fourside = True
@@ -31,6 +32,10 @@ if (box_width < box_depth):
     tmp = box_width
     box_width = box_depth
     box_depth = tmp
+
+# apply a short side-tab:
+if (box_height <= short_sidetab_threshold):
+    side_tab = side_tab / 2
 
 filename = '_'.join(['boxgen'+version, str(box_height)+'h', str(box_width)+'w', str(box_depth)+'d']) + '.svg'
 
